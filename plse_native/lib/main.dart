@@ -72,26 +72,25 @@ Future<String> loadAsset(String path) async {
   return await rootBundle.loadString(path);
 }
 
-Future<String> loadCSV() async {
-  return "hello";
-  // return loadAsset('assets/out-of-state-res.csv').then((output) {
-  //   List<List<dynamic>> rowsAsListOfValues =
-  //       const CsvToListConverter().convert(output);
+Future<HashMap> loadCSV() async {
+  return loadAsset('assets/out-of-state-res.csv').then((output) {
+    List<List<dynamic>> rowsAsListOfValues =
+        const CsvToListConverter().convert(output);
 
-  //   // print(rowsAsListOfValues.sublist(1));
-  //   HashMap<String, List<Organization>> map = HashMap();
+    // print(rowsAsListOfValues.sublist(1));
+    HashMap<String, List<Organization>> map = HashMap();
 
-  //   for (int i = 1; i < rowsAsListOfValues.length; i++) {
-  //     String key = rowsAsListOfValues[i][0];
+    for (int i = 1; i < rowsAsListOfValues.length; i++) {
+      String key = rowsAsListOfValues[i][0];
 
-  //     Organization item = Organization(rowsAsListOfValues[i].sublist(1));
-  //     if (!map.containsKey(key)) {
-  //       map[key] = List<Organization>();
-  //     }
-  //     map[key].add(item);
-  //   }
-  //   return map;
-  // });
+      Organization item = Organization(rowsAsListOfValues[i].sublist(1));
+      if (!map.containsKey(key)) {
+        map[key] = List<Organization>();
+      }
+      map[key].add(item);
+    }
+    return map;
+  });
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -122,9 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     //   });
 
-    return FutureBuilder<HashMap<dynamic, dynamic>>(
-      future: loadCSV, // a previously-obtained Future<String> or null
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+    return FutureBuilder<HashMap>(
+      future: loadCSV(), // a previously-obtained Future<String> or null
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
             return Text('Press button to start.');
