@@ -29,26 +29,26 @@ void loadCSV() {
 //   return directory.path;
 // }
 
-// Future<File> get _localFile async {
-//   final path = await _localPath;
-//   return File('$path/assets/out-of-state-res.csv');
-// }
-
-// Future<int> readFile() async {
-//   try {
-//     final file = await _localFile;
-
-//     // Read the file.
-//     String contents = await file.readAsString();
-//     print(contents);
-
 //     return int.parse(contents);
 //   } catch (e) {
 //     // If encountering an error, return 0.
 //     throw e;
-//     return 0;
 //   }
 // }
+
+class Organization {
+  String website, address, city, zip;
+  List<String> numbers, resources;
+
+  Organization(String website, String address, String city, String zip, List<String> numbers, List<String> resources) {
+    this.website = website;
+    this.address = address;
+    this.city = city;
+    this.zip = zip;
+    this.numbers = numbers;
+    this.resources = resources;
+  }
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
