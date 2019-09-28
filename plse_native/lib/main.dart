@@ -3,8 +3,9 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(MyApp());
 
@@ -82,11 +83,14 @@ Future<HashMap> loadCSV() async {
 
     for (int i = 1; i < rowsAsListOfValues.length; i++) {
       String key = rowsAsListOfValues[i][0];
-
+      if (rowsAsListOfValues[i].sublist(1)[0] == "N/A") {
+        continue;
+      }
       Organization item = Organization(rowsAsListOfValues[i].sublist(1));
       if (!map.containsKey(key)) {
         map[key] = List<Organization>();
       }
+
       map[key].add(item);
     }
     return map;
@@ -132,7 +136,10 @@ class _MyHomePageState extends State<MyHomePage> {
             return Text('Awaiting result...');
           case ConnectionState.done:
             if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-            return Text('Result: ${snapshot.data}');
+            // return Scaffold(body: Text('Result: ${snapshot.data}'));
+            return ResourcesScreen(
+              data: snapshot.data,
+            );
         }
         return null; // unreachable
       },
@@ -180,5 +187,115 @@ class _MyHomePageState extends State<MyHomePage> {
     //     ), // This trailing comma makes auto-formatting nicer for build methods.
     //   );
     // }
+  }
+}
+
+class ResourcesScreen extends StatelessWidget {
+  HashMap data;
+
+  ResourcesScreen({this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    var keys = data.keys.toList();
+    keys.sort();
+    return Scaffold(
+      appBar: AppBar(title: Text("PLSE Resources")),
+      body: ListView.builder(
+          itemCount: keys.length,
+          itemBuilder: (context, index) {
+            return ExpansionTile(
+              title: Text(keys.elementAt(index)),
+              children: <Widget>[
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: data[keys.elementAt(index)].length,
+                  itemBuilder: (context, innerIndex) {
+                    var item = data[keys.elementAt(index)][innerIndex];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailScreen(
+                              org: item,
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        title: Text(item.name),
+                      ),
+                    );
+                    // return ListTile(
+                    //   title: data[data.keys.elementAt(index)][innerIndex].name,
+                    // );
+                  },
+                )
+              ],
+            );
+          }),
+    );
+  }
+}
+
+class DetailScreen extends StatelessWidget {
+  Organization org;
+
+  DetailScreen({this.org});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(org.name),
+      ),
+      body: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              ListTile(
+                  title: Text(org.name),
+                  subtitle: ListView(
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      Text(org.address),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Text('${org.city} ${org.zip}'),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Linkify(
+                        onOpen: (link) async {
+                          if (await canLaunch(link.url)) {
+                            await launch(link.url);
+                          } else {
+                            throw 'Could not launch $link';
+                          }
+                        },
+                        text: org.website,
+                      ),
+                      // Text(org.website),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Text(org.phone),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Text(org.resources),
+                    ],
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
