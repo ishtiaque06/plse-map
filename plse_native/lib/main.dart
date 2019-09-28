@@ -28,7 +28,20 @@ Future<int> readFile() async {
   } catch (e) {
     // If encountering an error, return 0.
     throw e;
-    return 0;
+  }
+}
+
+class Organization {
+  String website, address, city, zip;
+  List<String> numbers, resources;
+
+  Organization(String website, String address, String city, String zip, List<String> numbers, List<String> resources) {
+    this.website = website;
+    this.address = address;
+    this.city = city;
+    this.zip = zip;
+    this.numbers = numbers;
+    this.resources = resources;
   }
 }
 
