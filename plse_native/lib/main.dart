@@ -1,35 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 void main() => runApp(MyApp());
 
-Future<String> get _localPath async {
-  final directory = await getApplicationDocumentsDirectory();
-
-  return directory.path;
+Future<String> loadAsset(String path) async {
+  return await rootBundle.loadString(path);
 }
 
-Future<File> get _localFile async {
-  final path = await _localPath;
-  return File('$path/out-of-state-res.csv');
+void loadCSV() {
+  loadAsset('assets/out-of-state-res.csv').then((dynamic output) {
+    print(output);
+  });
 }
 
-Future<int> readFile() async {
-  try {
-    final file = await _localFile;
+// Future<String> get _localPath async {
+//   final directory = await getApplicationDocumentsDirectory();
 
-    // Read the file.
-    String contents = await file.readAsString();
-    print(contents);
+//   return directory.path;
+// }
 
-    return int.parse(contents);
-  } catch (e) {
-    // If encountering an error, return 0.
-    throw e;
-  }
-}
+//     return int.parse(contents);
+//   } catch (e) {
+//     // If encountering an error, return 0.
+//     throw e;
+//   }
+// }
 
 class Organization {
   String website, address, city, zip;
@@ -91,7 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      readFile();
+      // readFile();
+      loadCSV();
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
