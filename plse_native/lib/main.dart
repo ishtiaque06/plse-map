@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/services.dart';
@@ -6,47 +8,22 @@ import 'dart:io';
 
 void main() => runApp(MyApp());
 
-Future<String> loadAsset(String path) async {
-  return await rootBundle.loadString(path);
-}
-
-void loadCSV() {
-  loadAsset('assets/out-of-state-res.csv').then((dynamic output) {
-    List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(output);
-
-    print(rowsAsListOfValues.sublist(1));
-
-    for (int i = 1; i < rowsAsListOfValues.length; i++) {
-      Organization(rowsAsListOfValues[i]);
-    }
-  });
-}
-
-// Future<String> get _localPath async {
-//   final directory = await getApplicationDocumentsDirectory();
-
-//   return directory.path;
-// }
-
-//     return int.parse(contents);
-//   } catch (e) {
-//     // If encountering an error, return 0.
-//     throw e;
-//   }
-// }
-
 class Organization {
-  String website, address, city, zip;
-  List<String> numbers, resources;
+  String website, address, city, name, phone, resources, zip;
 
-  Organization(String website, String address, String city, String zip, List<String> numbers, List<String> resources) {
-    this.website = website;
-    this.address = address;
-    this.city = city;
-    this.zip = zip;
-    this.numbers = numbers;
-    this.resources = resources;
+  Organization(List lst) {
+    this.name = lst[0];
+    this.website = lst[1];
+    this.phone = lst[2];
+    this.address = lst[3];
+    this.city = lst[4];
+    this.zip = lst[5].toString();
+    this.resources = lst[6];
+  }
+
+  @override
+  String toString() {
+    return this.name;
   }
 }
 
@@ -91,13 +68,37 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+Future<String> loadAsset(String path) async {
+  return await rootBundle.loadString(path);
+}
+
+Future<String> loadCSV() async {
+  return "hello";
+  // return loadAsset('assets/out-of-state-res.csv').then((output) {
+  //   List<List<dynamic>> rowsAsListOfValues =
+  //       const CsvToListConverter().convert(output);
+
+  //   // print(rowsAsListOfValues.sublist(1));
+  //   HashMap<String, List<Organization>> map = HashMap();
+
+  //   for (int i = 1; i < rowsAsListOfValues.length; i++) {
+  //     String key = rowsAsListOfValues[i][0];
+
+  //     Organization item = Organization(rowsAsListOfValues[i].sublist(1));
+  //     if (!map.containsKey(key)) {
+  //       map[key] = List<Organization>();
+  //     }
+  //     map[key].add(item);
+  //   }
+  //   return map;
+  // });
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
     setState(() {
-      // readFile();
-      loadCSV();
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
@@ -115,47 +116,70 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: ListView(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          // mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    // return FutureBuilder<HashMap<dynamic, dynamic>>(
+    //   future: loadCSV,
+    //   builder: (BuildContext context, AsyncSnapshot<String> snapshot){
+
+    //   });
+
+    return FutureBuilder<HashMap<dynamic, dynamic>>(
+      future: loadCSV, // a previously-obtained Future<String> or null
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Text('Press button to start.');
+          case ConnectionState.active:
+          case ConnectionState.waiting:
+            return Text('Awaiting result...');
+          case ConnectionState.done:
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            return Text('Result: ${snapshot.data}');
+        }
+        return null; // unreachable
+      },
     );
+    //   )
+    //     appBar: AppBar(
+    //       // Here we take the value from the MyHomePage object that was created by
+    //       // the App.build method, and use it to set our appbar title.
+    //       title: Text(widget.title),
+    //     ),
+    //     body: Center(
+    //       // Center is a layout widget. It takes a single child and positions it
+    //       // in the middle of the parent.
+    //       child: ListView(
+    //         // Column is also layout widget. It takes a list of children and
+    //         // arranges them vertically. By default, it sizes itself to fit its
+    //         // children horizontally, and tries to be as tall as its parent.
+    //         //
+    //         // Invoke "debug painting" (press "p" in the console, choose the
+    //         // "Toggle Debug Paint" action from the Flutter Inspector in Android
+    //         // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+    //         // to see the wireframe for each widget.
+    //         //
+    //         // Column has various properties to control how it sizes itself and
+    //         // how it positions its children. Here we use mainAxisAlignment to
+    //         // center the children vertically; the main axis here is the vertical
+    //         // axis because Columns are vertical (the cross axis would be
+    //         // horizontal).
+    //         // mainAxisAlignment: MainAxisAlignment.center,
+    //         children: <Widget>[
+    //           Text(
+    //             'You have pushed the button this many times:',
+    //           ),
+    //           Text(
+    //             '$_counter',
+    //             style: Theme.of(context).textTheme.display1,
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //     floatingActionButton: FloatingActionButton(
+    //       onPressed: _incrementCounter,
+    //       tooltip: 'Increment',
+    //       child: Icon(Icons.add),
+    //     ), // This trailing comma makes auto-formatting nicer for build methods.
+    //   );
+    // }
   }
 }
