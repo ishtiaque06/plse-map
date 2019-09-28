@@ -12,7 +12,14 @@ Future<String> loadAsset(String path) async {
 
 void loadCSV() {
   loadAsset('assets/out-of-state-res.csv').then((dynamic output) {
-    print(output);
+    List<List<dynamic>> rowsAsListOfValues =
+        const CsvToListConverter().convert(output);
+
+    print(rowsAsListOfValues.sublist(1));
+
+    for (int i = 1; i < rowsAsListOfValues.length; i++) {
+      Organization(rowsAsListOfValues[i]);
+    }
   });
 }
 
@@ -117,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
+        child: ListView(
           // Column is also layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
           // children horizontally, and tries to be as tall as its parent.
@@ -132,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // center the children vertically; the main axis here is the vertical
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
               'You have pushed the button this many times:',
